@@ -1,15 +1,15 @@
 {
-  "domain": "awesome_thermostat",
-  "name": "Awesome Thermostat",
-  "documentation": "https://github.com/dadge/awesome_thermostat",
+  "domain": "ryansch_awesome_thermostat",
+  "name": "@ryansch Awesome Thermostat",
+  "documentation": "https://github.com/ryansch/awesome_thermostat",
   "dependencies": [
     "sensor",
     "switch"
   ],
   "codeowners": [
-    "@dadge"
+    "@ryansch
   ],
   "version": "1.0.0",
-  "issue_tracker": "https://github.com/dadge/awesome_thermostat/issues",
+  "issue_tracker": "https://github.com/ryansch/awesome_thermostat/issues",
   "iot_class": "local_polling"
 }
