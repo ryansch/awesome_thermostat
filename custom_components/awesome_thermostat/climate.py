@@ -79,6 +79,7 @@ CONF_HOT_TOLERANCE = "hot_tolerance"
 CONF_KEEP_ALIVE = "keep_alive"
 CONF_INITIAL_HVAC_MODE = "initial_hvac_mode"
 CONF_PRECISION = "precision"
+CONF_TEMP_STEP = "target_temp_step"
 
 
 SUPPORT_FLAGS = SUPPORT_TARGET_TEMPERATURE
@@ -119,6 +120,9 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Optional(CONF_PRECISION): vol.In(
             [PRECISION_TENTHS, PRECISION_HALVES, PRECISION_WHOLE]
         ),
+        vol.Optional(CONF_TEMP_STEP): vol.In(
+            [PRECISION_TENTHS, PRECISION_HALVES, PRECISION_WHOLE]
+        ),
         vol.Optional(CONF_UNIQUE_ID): cv.string,
     }
 ).extend({vol.Optional(v): vol.Coerce(float) for (k, v) in CONF_PRESETS.items()})
@@ -151,6 +155,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     no_motion_mode = config.get(CONF_NO_MOTION_MODE)
     motion_delay = config.get(CONF_MOTION_DELAY)
     precision = config.get(CONF_PRECISION)
+    target_temperature_step = config.get(CONF_TEMP_STEP)
     unit = hass.config.units.temperature_unit
     unique_id = config.get(CONF_UNIQUE_ID)
 
@@ -176,6 +181,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                 initial_hvac_mode,
                 presets,
                 precision,
+                target_temperature_step,
                 unit,
                 unique_id,
             )
@@ -207,6 +213,7 @@ class AwesomeThermostat(ClimateEntity, RestoreEntity):
         initial_hvac_mode,
         presets,
         precision,
+        target_temperature_step,
         unit,
         unique_id,
     ):
@@ -239,6 +246,7 @@ class AwesomeThermostat(ClimateEntity, RestoreEntity):
         self._saved_hvac_mode = self._hvac_mode
         self._saved_target_temp = target_temp or next(iter(presets.values()), None)
         self._temp_precision = precision
+        self._temp_target_temperature_step = target_temperature_step
         if self.ac_mode:
             self._hvac_list = [HVAC_MODE_COOL, HVAC_MODE_OFF]
         else:
@@ -379,8 +387,9 @@ class AwesomeThermostat(ClimateEntity, RestoreEntity):
     @property
     def target_temperature_step(self):
         """Return the supported step of target temperature."""
-        # Since this integration does not yet have a step size parameter
-        # we have to re-use the precision as the step size for now.
+        if self._temp_target_temperature_step is not None:
+            return self._temp_target_temperature_step
+        # if a target_temperature_step is not defined, fallback to equal the precision
         return self.precision
 
     @property
